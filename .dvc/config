@@ -1,5 +1,8 @@
 [core]
-    remote = local
+    remote = s3
     autostage = true
 ['remote "local"']
     url = /Users/zoraiz/dvc-remotes/retinaops
+['remote "s3"']
+    url = s3://retinaops-dvc-d128506f/retinaops
+    region = ap-southeast-2
