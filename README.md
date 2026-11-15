@@ -20,7 +20,7 @@ The data is the APTOS 2019 Blindness Detection set (3,662 images, 224×224 pixel
 
 | Requirement | Implementation |
 |---|---|
-| Dataset & versioning | `data/raw` tracked with DVC (`data/raw.dvc`). `data/processed` and the model checkpoints are DVC pipeline outputs. All are pushed to a DVC remote (local now, S3 in a later phase). |
+| Dataset & versioning | `data/raw` tracked with DVC (`data/raw.dvc`). `data/processed` and the model checkpoints are DVC pipeline outputs. All are pushed to a private, versioned AWS S3 bucket (`ap-southeast-2`), the default DVC remote. |
 | Pipeline | `dvc.yaml` has these stages: `validate → preprocess → train@{resnet50, efficientnet_b0} → evaluate@{…} → register`. All hyperparameters live in `params.yaml`. `dvc repro` re-runs only the stages whose code, data or parameters changed. |
 | Experiment tracking | MLflow logs parameters, per-epoch training and validation curves, and test metrics: accuracy, QWK, macro-F1, per-class and referable-DR sensitivity/specificity, and macro AUC-ROC. Artifacts include the confusion matrix, training history and the model. Each run is tagged with its git commit and DVC data hash. |
 | Model registry | Both models are registered in the MLflow Model Registry as versions of `retinaops-dr-classifier`, with tags for architecture, test scores, data version and commit. The best model by test QWK gets the `production` alias, but only if it beats the current production version. |
@@ -62,7 +62,7 @@ Training uses PyTorch and timm, which lets us reuse our earlier validated PyTorc
 # 1. Environment (Python 3.12, managed by uv)
 uv sync
 
-# 2. Data: pull the versioned dataset from the DVC remote ...
+# 2. Data: pull the versioned dataset from the S3 DVC remote (needs AWS access) ...
 uv run dvc pull
 #    ... or download it from Kaggle and track it (needs ~/.kaggle/kaggle.json)
 uv run python -m retinaops.data.download && uv run dvc add data/raw
@@ -135,6 +135,6 @@ reports/                     metrics, plots and validation reports (git-tracked)
 ## Roadmap
 
 - **Phase 2:** FastAPI inference service (`/predict`, `/health`, `/model-info`), a Streamlit UI with Grad-CAM, and Docker images for training and serving.
-- **Phase 3:** GitHub Actions CI/CD (pytest → build → ECR), deployment to AWS App Runner or ECS Fargate, CloudWatch monitoring, and moving the DVC remote to S3.
+- **Phase 3:** GitHub Actions CI/CD (pytest → build → ECR), deployment to AWS App Runner or ECS Fargate, and CloudWatch monitoring.
 
 *Proof of concept for a university MLOps course. Not a medical device.*
