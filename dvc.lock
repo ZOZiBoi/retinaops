@@ -1,0 +1,260 @@
+schema: '2.0'
+stages:
+  validate:
+    cmd: uv run python -m retinaops.data.validate
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: abb31b90bd5c253818df5121792dc73c.dir
+      size: 250281929
+      nfiles: 3663
+    - path: src/retinaops/data/validate.py
+      hash: md5
+      md5: d51af57e222748236b7a0b4d82ad0337
+      size: 2837
+    params:
+      params.yaml:
+        data.classes:
+        - No_DR
+        - Mild
+        - Moderate
+        - Severe
+        - Proliferate_DR
+        validate:
+          min_side: 128
+          max_imbalance_ratio: 15
+    outs:
+    - path: reports/data_validation.json
+      hash: md5
+      md5: a5eac9359098a10859393a0d7084e3b6
+      size: 546
+  preprocess:
+    cmd: uv run python -m retinaops.data.preprocess
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: abb31b90bd5c253818df5121792dc73c.dir
+      size: 250281929
+      nfiles: 3663
+    - path: reports/data_validation.json
+      hash: md5
+      md5: a5eac9359098a10859393a0d7084e3b6
+      size: 546
+    - path: src/retinaops/data/preprocess.py
+      hash: md5
+      md5: 39a911751cd24baa566f6d5f8c31f8e5
+      size: 2611
+    params:
+      params.yaml:
+        preprocess:
+          image_size: 224
+          crop_black_border: true
+          val_size: 0.15
+          test_size: 0.15
+        seed: 42
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 9fa739b3e4266b42e0ba5f9152865c2f.dir
+      size: 266707292
+      nfiles: 3665
+    - path: reports/split_summary.json
+      hash: md5
+      md5: fb6d934b79d47abf9c23d7b25e4019fe
+      size: 328
+  train@resnet50:
+    cmd: uv run python -m retinaops.train --model resnet50
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 9fa739b3e4266b42e0ba5f9152865c2f.dir
+      size: 266707292
+      nfiles: 3665
+    - path: src/retinaops/data/dataset.py
+      hash: md5
+      md5: 519ca1b16837bba0a7ece721db7aa74c
+      size: 1970
+    - path: src/retinaops/metrics.py
+      hash: md5
+      md5: fa1b8d7449b90144ae688d795663ab30
+      size: 2471
+    - path: src/retinaops/model.py
+      hash: md5
+      md5: b89bb05eb66b829903568c36494a95d3
+      size: 835
+    - path: src/retinaops/train.py
+      hash: md5
+      md5: eb3615312af59f44053fa68093ab10b1
+      size: 7888
+    params:
+      params.yaml:
+        models.resnet50:
+          lr: 0.0003
+          batch_size: 32
+        seed: 42
+        train:
+          epochs: 15
+          num_workers: 4
+          weight_decay: 0.01
+          label_smoothing: 0.05
+          class_weights: true
+          weighted_sampler: false
+          early_stopping_patience: 5
+          amp: true
+    outs:
+    - path: models/resnet50/model.pt
+      hash: md5
+      md5: 30b8930588800711b9c066522869487a
+      size: 94371699
+    - path: models/resnet50/run.json
+      hash: md5
+      md5: 4aa394a867871d4c110822922be79c38
+      size: 108
+    - path: reports/resnet50/history.csv
+      hash: md5
+      md5: 9af75ea5be933e62a8f8acbab79faee4
+      size: 2627
+  train@efficientnet_b0:
+    cmd: uv run python -m retinaops.train --model efficientnet_b0
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 9fa739b3e4266b42e0ba5f9152865c2f.dir
+      size: 266707292
+      nfiles: 3665
+    - path: src/retinaops/data/dataset.py
+      hash: md5
+      md5: 519ca1b16837bba0a7ece721db7aa74c
+      size: 1970
+    - path: src/retinaops/metrics.py
+      hash: md5
+      md5: fa1b8d7449b90144ae688d795663ab30
+      size: 2471
+    - path: src/retinaops/model.py
+      hash: md5
+      md5: b89bb05eb66b829903568c36494a95d3
+      size: 835
+    - path: src/retinaops/train.py
+      hash: md5
+      md5: eb3615312af59f44053fa68093ab10b1
+      size: 7888
+    params:
+      params.yaml:
+        models.efficientnet_b0:
+          lr: 0.001
+          batch_size: 64
+        seed: 42
+        train:
+          epochs: 15
+          num_workers: 4
+          weight_decay: 0.01
+          label_smoothing: 0.05
+          class_weights: true
+          weighted_sampler: false
+          early_stopping_patience: 5
+          amp: true
+    outs:
+    - path: models/efficientnet_b0/model.pt
+      hash: md5
+      md5: 69b9b37187f15c39dbf7e66c65dc695b
+      size: 16326803
+    - path: models/efficientnet_b0/run.json
+      hash: md5
+      md5: d1aea39efb639046ff82aaee240cbbc2
+      size: 108
+    - path: reports/efficientnet_b0/history.csv
+      hash: md5
+      md5: 7ef18fa7d83eb183b371941e20b99851
+      size: 2584
+  evaluate@resnet50:
+    cmd: uv run python -m retinaops.evaluate --model resnet50
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 9fa739b3e4266b42e0ba5f9152865c2f.dir
+      size: 266707292
+      nfiles: 3665
+    - path: models/resnet50/model.pt
+      hash: md5
+      md5: 30b8930588800711b9c066522869487a
+      size: 94371699
+    - path: models/resnet50/run.json
+      hash: md5
+      md5: 4aa394a867871d4c110822922be79c38
+      size: 108
+    - path: src/retinaops/evaluate.py
+      hash: md5
+      md5: 609035b513cad545fb741240c70520a7
+      size: 3788
+    - path: src/retinaops/metrics.py
+      hash: md5
+      md5: fa1b8d7449b90144ae688d795663ab30
+      size: 2471
+    outs:
+    - path: reports/resnet50/confusion_matrix.png
+      hash: md5
+      md5: e8eff2894f498016f3af40439e30a4ba
+      size: 71252
+    - path: reports/resnet50/metrics.json
+      hash: md5
+      md5: 3dea4e0aaaa2973f348504de8e129051
+      size: 555
+  evaluate@efficientnet_b0:
+    cmd: uv run python -m retinaops.evaluate --model efficientnet_b0
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 9fa739b3e4266b42e0ba5f9152865c2f.dir
+      size: 266707292
+      nfiles: 3665
+    - path: models/efficientnet_b0/model.pt
+      hash: md5
+      md5: 69b9b37187f15c39dbf7e66c65dc695b
+      size: 16326803
+    - path: models/efficientnet_b0/run.json
+      hash: md5
+      md5: d1aea39efb639046ff82aaee240cbbc2
+      size: 108
+    - path: src/retinaops/evaluate.py
+      hash: md5
+      md5: 609035b513cad545fb741240c70520a7
+      size: 3788
+    - path: src/retinaops/metrics.py
+      hash: md5
+      md5: fa1b8d7449b90144ae688d795663ab30
+      size: 2471
+    outs:
+    - path: reports/efficientnet_b0/confusion_matrix.png
+      hash: md5
+      md5: b36e812d1a162c821ea68c9a4edae79b
+      size: 71811
+    - path: reports/efficientnet_b0/metrics.json
+      hash: md5
+      md5: 239c37447d244e722f1e4004ddbdabce
+      size: 553
+  register:
+    cmd: uv run python -m retinaops.register
+    deps:
+    - path: reports/efficientnet_b0/metrics.json
+      hash: md5
+      md5: 239c37447d244e722f1e4004ddbdabce
+      size: 553
+    - path: reports/resnet50/metrics.json
+      hash: md5
+      md5: 3dea4e0aaaa2973f348504de8e129051
+      size: 555
+    - path: src/retinaops/register.py
+      hash: md5
+      md5: c424f149318a20820b5e693b4f42f13b
+      size: 3461
+    params:
+      params.yaml:
+        registry:
+          model_name: retinaops-dr-classifier
+          selection_metric: qwk
+          production_alias: production
+    outs:
+    - path: reports/registry.json
+      hash: md5
+      md5: 527e42b74c82a91a5589be0f75c708ac
+      size: 586

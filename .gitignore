@@ -21,3 +21,4 @@ mlartifacts/
 
 .DS_Store
 .pytest_cache/
+reports/repro.log

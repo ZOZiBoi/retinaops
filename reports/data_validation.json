@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "num_images": 3662,
+  "class_distribution": {
+    "No_DR": {
+      "count": 1805,
+      "pct": 49.29
+    },
+    "Mild": {
+      "count": 370,
+      "pct": 10.1
+    },
+    "Moderate": {
+      "count": 999,
+      "pct": 27.28
+    },
+    "Severe": {
+      "count": 193,
+      "pct": 5.27
+    },
+    "Proliferate_DR": {
+      "count": 295,
+      "pct": 8.06
+    }
+  },
+  "imbalance_ratio": 9.35,
+  "max_imbalance_ratio": 15,
+  "errors": {
+    "missing": [],
+    "bad_images": [],
+    "bad_labels": [],
+    "duplicates": []
+  }
+}

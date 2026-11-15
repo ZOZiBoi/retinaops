@@ -1,0 +1,20 @@
+{
+  "accuracy": 0.7509,
+  "qwk": 0.8615,
+  "macro_f1": 0.6017,
+  "sensitivity_No_DR": 0.9705,
+  "specificity_No_DR": 0.9677,
+  "sensitivity_Mild": 0.6429,
+  "specificity_Mild": 0.8947,
+  "sensitivity_Moderate": 0.5067,
+  "specificity_Moderate": 0.9425,
+  "sensitivity_Severe": 0.5172,
+  "specificity_Severe": 0.9251,
+  "sensitivity_Proliferate_DR": 0.5227,
+  "specificity_Proliferate_DR": 0.9723,
+  "macro_sensitivity": 0.632,
+  "macro_specificity": 0.9405,
+  "referable_sensitivity": 0.7892,
+  "referable_specificity": 0.9572,
+  "auc_macro_ovr": 0.9158
+}

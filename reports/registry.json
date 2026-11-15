@@ -1,0 +1,27 @@
+{
+  "registered_model": "retinaops-dr-classifier",
+  "selection_metric": "qwk",
+  "candidates": [
+    {
+      "arch": "resnet50",
+      "version": 1,
+      "run_id": "fff371c2c844419688ebcbcbeed3b0d1",
+      "qwk": 0.8615
+    },
+    {
+      "arch": "efficientnet_b0",
+      "version": 2,
+      "run_id": "6420ab5288cc4c04848876f61a550112",
+      "qwk": 0.8497
+    }
+  ],
+  "best_candidate": {
+    "arch": "resnet50",
+    "version": 1,
+    "run_id": "fff371c2c844419688ebcbcbeed3b0d1",
+    "qwk": 0.8615
+  },
+  "previous_production": null,
+  "promoted": true,
+  "production_version": 1
+}
