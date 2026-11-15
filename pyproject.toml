@@ -7,7 +7,8 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "dvc>=3",
+    "botocore[crt]>=1.43.117",
+    "dvc[s3]>=3",
     "kagglehub>=1.0.3",
     "matplotlib>=3.11.2",
     "mlflow>=3",
