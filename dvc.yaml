@@ -1,0 +1,83 @@
+vars:
+  - params.yaml
+
+stages:
+  validate:
+    cmd: uv run python -m retinaops.data.validate
+    deps:
+      - data/raw
+      - src/retinaops/data/validate.py
+    params:
+      - data.classes
+      - validate
+    metrics:
+      - reports/data_validation.json:
+          cache: false
+
+  preprocess:
+    cmd: uv run python -m retinaops.data.preprocess
+    deps:
+      - data/raw
+      - reports/data_validation.json
+      - src/retinaops/data/preprocess.py
+    params:
+      - seed
+      - preprocess
+    outs:
+      - data/processed
+    metrics:
+      - reports/split_summary.json:
+          cache: false
+
+  train:
+    matrix:
+      model: [resnet50, efficientnet_b0]
+    cmd: uv run python -m retinaops.train --model ${item.model}
+    deps:
+      - data/processed
+      - src/retinaops/train.py
+      - src/retinaops/model.py
+      - src/retinaops/data/dataset.py
+      - src/retinaops/metrics.py
+    params:
+      - seed
+      - train
+      - models.${item.model}
+    outs:
+      - models/${item.model}/model.pt
+      - models/${item.model}/run.json:
+          cache: false
+    plots:
+      - reports/${item.model}/history.csv:
+          cache: false
+          x: epoch
+          y: val_qwk
+
+  evaluate:
+    matrix:
+      model: [resnet50, efficientnet_b0]
+    cmd: uv run python -m retinaops.evaluate --model ${item.model}
+    deps:
+      - data/processed
+      - models/${item.model}/model.pt
+      - models/${item.model}/run.json
+      - src/retinaops/evaluate.py
+      - src/retinaops/metrics.py
+    metrics:
+      - reports/${item.model}/metrics.json:
+          cache: false
+    plots:
+      - reports/${item.model}/confusion_matrix.png:
+          cache: false
+
+  register:
+    cmd: uv run python -m retinaops.register
+    deps:
+      - reports/resnet50/metrics.json
+      - reports/efficientnet_b0/metrics.json
+      - src/retinaops/register.py
+    params:
+      - registry
+    outs:
+      - reports/registry.json:
+          cache: false

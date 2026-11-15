@@ -1,0 +1,48 @@
+# RetinaOps pipeline parameters. Every stage reads its section from here;
+# DVC re-runs a stage only when the params it depends on change.
+
+seed: 42
+
+data:
+  kaggle_dataset: sovitrath/diabetic-retinopathy-224x224-2019-data  # APTOS 2019, 5 classes
+  raw_dir: data/raw
+  processed_dir: data/processed
+  classes: [No_DR, Mild, Moderate, Severe, Proliferate_DR]   # index == DR grade 0..4
+
+validate:
+  min_side: 128            # images smaller than this are flagged
+  max_imbalance_ratio: 15  # fail if largest/smallest class exceeds this
+
+preprocess:
+  image_size: 224
+  crop_black_border: true  # trim the dark background around the fundus
+  val_size: 0.15
+  test_size: 0.15
+
+train:
+  epochs: 15
+  num_workers: 4
+  weight_decay: 0.01
+  label_smoothing: 0.05
+  class_weights: true        # inverse-frequency weighted cross-entropy
+  weighted_sampler: false    # alternative: oversample rare grades per batch
+  early_stopping_patience: 5
+  amp: true                  # float16 autocast on MPS/CUDA
+
+# Per-architecture settings. The pipeline trains every model listed here.
+models:
+  resnet50:          # baseline (carried over from earlier experiments)
+    lr: 3.0e-4
+    batch_size: 32
+  efficientnet_b0:   # main model
+    lr: 1.0e-3
+    batch_size: 64
+
+registry:
+  model_name: retinaops-dr-classifier
+  selection_metric: qwk      # quadratic weighted kappa on the held-out test set
+  production_alias: production
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment: retinaops-dr-grading

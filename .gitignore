@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Data and models are versioned by DVC, not git
+/data/raw
+/data/processed
+/models/*/model.pt
+
+# Local MLflow tracking store and artifacts
+mlflow.db
+mlruns/
+mlartifacts/
+
+.DS_Store
+.pytest_cache/
